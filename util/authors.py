@@ -25,7 +25,10 @@ else:
 
 
 NAME_MAP = {
+    u('Gregory Lee'): u('Gregory R. Lee'),
+    u('Daniel M Pelt'): u('Daniel M. Pelt'),
     u('Helder'): u('Helder Oliveira'),
+    u('asnt'): u('Alexandre Saint'),
     u('Kai'): u('Kai Wohlfahrt'),
 }
 
@@ -53,6 +56,7 @@ def main():
 
         # Check the commit author name
         m = re.match(u('^@@@([^@]*)@@@'), line)
+        print(line)
         if m:
             name = m.group(1)
             line = line[m.end():]
@@ -106,6 +110,9 @@ def main():
 
     authors = list(authors)
     authors.sort(key=name_key)
+
+    if 'GitHub' in authors:
+        authors.remove('GitHub')
 
     # Print
     stdout_b.write(b"""
