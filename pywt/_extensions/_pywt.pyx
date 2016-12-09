@@ -946,7 +946,7 @@ cpdef np.dtype _check_dtype(data):
     cdef np.dtype dt
     try:
         dt = data.dtype
-        if dt not in (np.float64, np.float32):
+        if dt not in (np.float64, np.float32, np.complex64, np.complex128):
             # integer input was always accepted; convert to float64
             dt = np.dtype('float64')
     except AttributeError:
