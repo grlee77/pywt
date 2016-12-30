@@ -1,5 +1,6 @@
 cimport wavelet
 cimport numpy as np
+include "config.pxi"
 
 ctypedef Py_ssize_t pywt_index_t
 
@@ -7,11 +8,15 @@ ctypedef fused data_t:
     np.float32_t
     np.float64_t
 
-ctypedef fused cdata_t:
-    np.float32_t
-    np.float64_t
-    np.complex64_t
-    np.complex128_t
+IF HAVE_C99_CPLX:
+    ctypedef fused cdata_t:
+        np.float32_t
+        np.float64_t
+        np.complex64_t
+        np.complex128_t
+ELSE:
+    ctypedef data_t cdata_t
+
 
 cdef public class Wavelet [type WaveletType, object WaveletObject]:
     cdef wavelet.DiscreteWavelet* w
