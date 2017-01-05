@@ -65,6 +65,16 @@ typedef struct {
     float* dec_lo_float;
     float* rec_hi_float;
     float* rec_lo_float;
+#ifdef HAVE_C99_COMPLEX
+    double_complex* dec_hi_double_complex;
+    double_complex* dec_lo_double_complex;
+    double_complex* rec_hi_double_complex;
+    double_complex* rec_lo_double_complex;
+    float_complex* dec_hi_float_complex;
+    float_complex* dec_lo_float_complex;
+    float_complex* rec_hi_float_complex;
+    float_complex* rec_lo_float_complex;
+#endif
     size_t dec_len;   /* length of decomposition filter */
     size_t rec_len;   /* length of reconstruction filter */
 

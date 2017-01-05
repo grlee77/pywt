@@ -6,11 +6,6 @@
 
 #include "templating.h"
 
-
-#ifndef REAL_TYPE
-#error REAL_TYPE must be defined here.
-#else
-
 #ifndef TYPE
 #error TYPE must be defined here.
 #else
@@ -42,7 +37,7 @@
  */
 
 int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restrict input, const size_t N,
-                                                       const REAL_TYPE * const restrict filter, const size_t F,
+                                                       const TYPE * const restrict filter, const size_t F,
                                                        TYPE * const restrict output, const size_t step,
                                                        const size_t fstep)
 {
@@ -125,7 +120,7 @@ int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restri
 
 
 int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, const size_t N,
-                                         const REAL_TYPE * const restrict filter, const size_t F,
+                                         const TYPE * const restrict filter, const size_t F,
                                          TYPE * const restrict output,
                                          const size_t step, MODE mode)
 {
@@ -352,7 +347,7 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
 }
 
 int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, const size_t N,
-                                            const REAL_TYPE * const restrict filter, const size_t F,
+                                            const TYPE * const restrict filter, const size_t F,
                                             TYPE * const restrict output, const size_t O)
 {
     /* Performs a zero-padded convolution, using each input element for two
@@ -407,7 +402,7 @@ int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, c
 
 
 static int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const restrict input, const size_t N,
-                                                                     const REAL_TYPE * const restrict filter, const size_t F,
+                                                                     const TYPE * const restrict filter, const size_t F,
                                                                      TYPE * const restrict output, const size_t O)
 {
     // TODO? Allow for non-2 step
@@ -519,7 +514,7 @@ static int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE 
  */
 
 int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict input, const size_t N,
-                                                const REAL_TYPE * const restrict filter, const size_t F,
+                                                const TYPE * const restrict filter, const size_t F,
                                                 TYPE * const restrict output, const size_t O,
                                                 MODE mode)
 {
@@ -551,7 +546,7 @@ int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict inpu
 
 /* -> swt - todo */
 int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, const size_t N,
-                                             const REAL_TYPE * const restrict filter, const size_t F,
+                                             const TYPE * const restrict filter, const size_t F,
                                              TYPE * const restrict output,
                                              const size_t step, MODE mode)
 {
@@ -559,5 +554,4 @@ int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, 
 }
 
 #undef restrict
-#endif /* REAL_TYPE */
 #endif /* TYPE */

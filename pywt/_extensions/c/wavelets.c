@@ -72,7 +72,12 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
         SWAP(float*, w->rec_hi_float, w->dec_hi_float);
         SWAP(double*, w->rec_lo_double, w->dec_lo_double);
         SWAP(double*, w->rec_hi_double, w->dec_hi_double);
-
+#ifdef HAVE_C99_COMPLEX
+        SWAP(float_complex*, w->rec_lo_float_complex, w->dec_lo_float_complex);
+        SWAP(float_complex*, w->rec_hi_float_complex, w->dec_hi_float_complex);
+        SWAP(double_complex*, w->rec_lo_double_complex, w->dec_lo_double_complex);
+        SWAP(double_complex*, w->rec_hi_double_complex, w->dec_hi_double_complex);
+#endif
         {
             size_t i, j;
             for(i = 0, j = w->rec_len - 1; i < j; i++, j--){
@@ -85,6 +90,18 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                 SWAP(double, w->rec_hi_double[i], w->rec_hi_double[j]);
                 SWAP(double, w->dec_lo_double[i], w->dec_lo_double[j]);
                 SWAP(double, w->dec_hi_double[i], w->dec_hi_double[j]);
+#ifdef HAVE_C99_COMPLEX
+                SWAP(float_complex, w->rec_lo_float_complex[i], w->rec_lo_float_complex[j]);
+                SWAP(float_complex, w->rec_hi_float_complex[i], w->rec_hi_float_complex[j]);
+                SWAP(float_complex, w->dec_lo_float_complex[i], w->dec_lo_float_complex[j]);
+                SWAP(float_complex, w->dec_hi_float_complex[i], w->dec_hi_float_complex[j]);
+
+                SWAP(double_complex, w->rec_lo_double_complex[i], w->rec_lo_double_complex[j]);
+                SWAP(double_complex, w->rec_hi_double_complex[i], w->rec_hi_double_complex[j]);
+                SWAP(double_complex, w->dec_lo_double_complex[i], w->dec_lo_double_complex[j]);
+                SWAP(double_complex, w->dec_hi_double_complex[i], w->dec_hi_double_complex[j]);
+
+#endif
             }
         }
 
@@ -136,7 +153,31 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                       * db_double[coeffs_idx][i];
                 }
             }
+#ifdef HAVE_C99_COMPLEX
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_float_complex[i] = db_float_complex[coeffs_idx][i];
+                    w->dec_lo_float_complex[i] = db_float_complex[coeffs_idx][w->dec_len-1-i];
+                    w->rec_hi_float_complex[i] = ((i % 2) ? -1 : 1)
+                      * db_float_complex[coeffs_idx][w->dec_len-1-i];
+                    w->dec_hi_float_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * db_float_complex[coeffs_idx][i];
+                }
+            }
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_double_complex[i] = db_double_complex[coeffs_idx][i];
+                    w->dec_lo_double_complex[i] = db_double_complex[coeffs_idx][w->dec_len-1-i];
+                    w->rec_hi_double_complex[i] = ((i % 2) ? -1 : 1)
+                      * db_double_complex[coeffs_idx][w->dec_len-1-i];
+                    w->dec_hi_double_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * db_double_complex[coeffs_idx][i];
+                }
+            }
 
+#endif
             break;
         }
 
@@ -182,6 +223,31 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                       * sym_double[coeffs_idx][i];
                 }
             }
+#ifdef HAVE_C99_COMPLEX
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_float_complex[i] = sym_float_complex[coeffs_idx][i];
+                    w->dec_lo_float_complex[i] = sym_float_complex[coeffs_idx][w->dec_len-1-i];
+                    w->rec_hi_float_complex[i] = ((i % 2) ? -1 : 1)
+                      * sym_float_complex[coeffs_idx][w->dec_len-1-i];
+                    w->dec_hi_float_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * sym_float_complex[coeffs_idx][i];
+                }
+            }
+
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_double_complex[i] = sym_double_complex[coeffs_idx][i];
+                    w->dec_lo_double_complex[i] = sym_double_complex[coeffs_idx][w->dec_len-1-i];
+                    w->rec_hi_double_complex[i] = ((i % 2) ? -1 : 1)
+                      * sym_double_complex[coeffs_idx][w->dec_len-1-i];
+                    w->dec_hi_double_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * sym_double_complex[coeffs_idx][i];
+                }
+            }
+#endif
             break;
         }
 
@@ -228,6 +294,33 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                       * coif_double[coeffs_idx][i] * sqrt2_double;
                 }
             }
+#ifdef HAVE_C99_COMPLEX
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_float_complex[i] = coif_float_complex[coeffs_idx][i] * sqrt2_float;
+                    w->dec_lo_float_complex[i] = coif_float_complex[coeffs_idx][w->dec_len-1-i]
+                      * sqrt2_float;
+                    w->rec_hi_float_complex[i] = ((i % 2) ? -1 : 1)
+                      * coif_float_complex[coeffs_idx][w->dec_len-1-i] * sqrt2_float;
+                    w->dec_hi_float_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * coif_float_complex[coeffs_idx][i] * sqrt2_float;
+                }
+            }
+
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_double_complex[i] = coif_double_complex[coeffs_idx][i] * sqrt2_double;
+                    w->dec_lo_double_complex[i] = coif_double_complex[coeffs_idx][w->dec_len-1-i]
+                      * sqrt2_double;
+                    w->rec_hi_double_complex[i] = ((i % 2) ? -1 : 1)
+                      * coif_double_complex[coeffs_idx][w->dec_len-1-i] * sqrt2_double;
+                    w->dec_hi_double_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * coif_double_complex[coeffs_idx][i] * sqrt2_double;
+                }
+            }
+#endif
             break;
         }
 
@@ -296,6 +389,32 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                 size_t n = M_max - M;
                 size_t i;
                 for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_double_complex[i] = bior_double_complex[N - 1][0][i+n];
+                    w->dec_lo_double_complex[i] = bior_double_complex[N - 1][M_idx+1][w->dec_len-1-i];
+                    w->rec_hi_double_complex[i] = ((i % 2) ? -1 : 1)
+                      * bior_double_complex[N - 1][M_idx+1][w->dec_len-1-i];
+                    w->dec_hi_double_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * bior_double_complex[N - 1][0][i+n];
+                }
+            }
+#ifdef HAVE_C99_COMPLEX
+           {
+                size_t n = M_max - M;
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_float_complex[i] = bior_float_complex[N - 1][0][i+n];
+                    w->dec_lo_float_complex[i] = bior_float_complex[N - 1][M_idx+1][w->dec_len-1-i];
+                    w->rec_hi_float_complex[i] = ((i % 2) ? -1 : 1)
+                      * bior_float_complex[N - 1][M_idx+1][w->dec_len-1-i];
+                    w->dec_hi_float_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * bior_float_complex[N - 1][0][i+n];
+                }
+            }
+
+            {
+                size_t n = M_max - M;
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
                     w->rec_lo_double[i] = bior_double[N - 1][0][i+n];
                     w->dec_lo_double[i] = bior_double[N - 1][M_idx+1][w->dec_len-1-i];
                     w->rec_hi_double[i] = ((i % 2) ? -1 : 1)
@@ -304,7 +423,7 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                       * bior_double[N - 1][0][i+n];
                 }
             }
-
+#endif
             break;
         }
 
@@ -345,6 +464,31 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
                       * dmey_double[i];
                 }
             }
+#ifdef HAVE_C99_COMPLEX
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_float_complex[i] = dmey_float_complex[i];
+                    w->dec_lo_float_complex[i] = dmey_float_complex[w->dec_len-1-i];
+                    w->rec_hi_float_complex[i] = ((i % 2) ? -1 : 1)
+                      * dmey_float_complex[w->dec_len-1-i];
+                    w->dec_hi_float_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * dmey_float_complex[i];
+                }
+            }
+
+            {
+                size_t i;
+                for(i = 0; i < w->rec_len; ++i){
+                    w->rec_lo_double_complex[i] = dmey_double_complex[i];
+                    w->dec_lo_double_complex[i] = dmey_double_complex[w->dec_len-1-i];
+                    w->rec_hi_double_complex[i] = ((i % 2) ? -1 : 1)
+                      * dmey_double_complex[w->dec_len-1-i];
+                    w->dec_hi_double_complex[i] = (((w->dec_len-1-i) % 2) ? -1 : 1)
+                      * dmey_double_complex[i];
+                }
+            }
+#endif
             break;
         default:
             return NULL;
@@ -527,11 +671,23 @@ DiscreteWavelet* blank_discrete_wavelet(size_t filters_length)
         w->dec_hi_double = wtcalloc(filters_length, sizeof(double));
         w->rec_lo_double = wtcalloc(filters_length, sizeof(double));
         w->rec_hi_double = wtcalloc(filters_length, sizeof(double));
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = wtcalloc(filters_length, sizeof(float_complex));
+        w->dec_hi_float_complex = wtcalloc(filters_length, sizeof(float_complex));
+        w->rec_lo_float_complex = wtcalloc(filters_length, sizeof(float_complex));
+        w->rec_hi_float_complex = wtcalloc(filters_length, sizeof(float_complex));
 
+        w->dec_lo_double_complex = wtcalloc(filters_length, sizeof(double_complex));
+        w->dec_hi_double_complex = wtcalloc(filters_length, sizeof(double_complex));
+        w->rec_lo_double_complex = wtcalloc(filters_length, sizeof(double_complex));
+        w->rec_hi_double_complex = wtcalloc(filters_length, sizeof(double_complex));
+#endif
         if(w->dec_lo_float == NULL || w->dec_hi_float == NULL ||
            w->rec_lo_float == NULL || w->rec_hi_float == NULL ||
            w->dec_lo_double == NULL || w->dec_hi_double == NULL ||
-           w->rec_lo_double == NULL || w->rec_hi_double == NULL){
+           w->rec_lo_double == NULL || w->rec_hi_double == NULL)
+            //TODO: add complex types in this check
+        {
             free_discrete_wavelet(w);
             return NULL;
         }
@@ -547,6 +703,17 @@ DiscreteWavelet* blank_discrete_wavelet(size_t filters_length)
         w->dec_hi_double = NULL;
         w->rec_lo_double = NULL;
         w->rec_hi_double = NULL;
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = NULL;
+        w->dec_hi_float_complex = NULL;
+        w->rec_lo_float_complex = NULL;
+        w->rec_hi_float_complex = NULL;
+
+        w->dec_lo_double_complex = NULL;
+        w->dec_hi_double_complex = NULL;
+        w->rec_lo_double_complex = NULL;
+        w->rec_hi_double_complex = NULL;
+#endif
     }
     /* set w->base properties to "blank" values */
     w->base.support_width = -1;
@@ -594,6 +761,12 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
         w->dec_hi_float = wtmalloc(w->dec_len * sizeof(float));
         w->dec_lo_double = wtmalloc(w->dec_len * sizeof(double));
         w->dec_hi_double = wtmalloc(w->dec_len * sizeof(double));
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = wtmalloc(w->dec_len * sizeof(float_complex));
+        w->dec_hi_float_complex = wtmalloc(w->dec_len * sizeof(float_complex));
+        w->dec_lo_double_complex = wtmalloc(w->dec_len * sizeof(double_complex));
+        w->dec_hi_double_complex = wtmalloc(w->dec_len * sizeof(double_complex));
+#endif
         if(w->dec_lo_float == NULL || w->dec_hi_float == NULL ||
             w->dec_lo_double == NULL || w->dec_hi_double == NULL){
            free_discrete_wavelet(w);
@@ -607,6 +780,13 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
 
         w->dec_lo_double = NULL;
         w->dec_hi_double = NULL;
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = NULL;
+        w->dec_hi_float_complex = NULL;
+
+        w->dec_lo_double_complex = NULL;
+        w->dec_hi_double_complex = NULL;
+#endif
     }
     if (base->rec_len > 0)
     {
@@ -614,6 +794,12 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
         w->rec_hi_float = wtmalloc(w->rec_len * sizeof(float));
         w->rec_lo_double = wtmalloc(w->rec_len * sizeof(double));
         w->rec_hi_double = wtmalloc(w->rec_len * sizeof(double));
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = wtmalloc(w->dec_len * sizeof(float_complex));
+        w->dec_hi_float_complex = wtmalloc(w->dec_len * sizeof(float_complex));
+        w->dec_lo_double_complex = wtmalloc(w->dec_len * sizeof(double_complex));
+        w->dec_hi_double_complex = wtmalloc(w->dec_len * sizeof(double_complex));
+#endif
         if( w->rec_lo_float == NULL || w->rec_hi_float == NULL ||
             w->rec_lo_double == NULL || w->rec_hi_double == NULL){
            free_discrete_wavelet(w);
@@ -627,6 +813,13 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
 
         w->rec_lo_double = NULL;
         w->rec_hi_double = NULL;
+#ifdef HAVE_C99_COMPLEX
+        w->dec_lo_float_complex = NULL;
+        w->dec_hi_float_complex = NULL;
+
+        w->dec_lo_double_complex = NULL;
+        w->dec_hi_double_complex = NULL;
+#endif
     }
 
 
@@ -637,6 +830,12 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
         memcpy(w->dec_hi_float, base->dec_hi_float, w->dec_len * sizeof(float));
         memcpy(w->dec_lo_double, base->dec_lo_double, w->dec_len * sizeof(double));
         memcpy(w->dec_hi_double, base->dec_hi_double, w->dec_len * sizeof(double));
+#ifdef HAVE_C99_COMPLEX
+        memcpy(w->dec_lo_float_complex, base->dec_lo_float_complex, w->dec_len * sizeof(float_complex));
+        memcpy(w->dec_hi_float_complex, base->dec_hi_float_complex, w->dec_len * sizeof(float_complex));
+        memcpy(w->dec_lo_double_complex, base->dec_lo_double_complex, w->dec_len * sizeof(double_complex));
+        memcpy(w->dec_hi_double_complex, base->dec_hi_double_complex, w->dec_len * sizeof(double_complex));
+#endif
     }
     if (base->rec_len > 0)
     {
@@ -644,6 +843,12 @@ DiscreteWavelet* copy_discrete_wavelet(DiscreteWavelet* base)
         memcpy(w->rec_hi_float, base->rec_hi_float, w->rec_len * sizeof(float));
         memcpy(w->rec_lo_double, base->rec_lo_double, w->rec_len * sizeof(double));
         memcpy(w->rec_hi_double, base->rec_hi_double, w->rec_len * sizeof(double));
+#ifdef HAVE_C99_COMPLEX
+        memcpy(w->rec_lo_float_complex, base->rec_lo_float_complex, w->rec_len * sizeof(float_complex));
+        memcpy(w->rec_hi_float_complex, base->rec_hi_float_complex, w->rec_len * sizeof(float_complex));
+        memcpy(w->rec_lo_double_complex, base->rec_lo_double_complex, w->rec_len * sizeof(double_complex));
+        memcpy(w->rec_hi_double_complex, base->rec_hi_double_complex, w->rec_len * sizeof(double_complex));
+#endif
     }
     return w;
 }
@@ -657,6 +862,12 @@ void free_discrete_wavelet(DiscreteWavelet *w){
         wtfree(w->dec_hi_float);
         wtfree(w->dec_lo_double);
         wtfree(w->dec_hi_double);
+#ifdef HAVE_C99_COMPLEX
+        wtfree(w->dec_lo_float_complex);
+        wtfree(w->dec_hi_float_complex);
+        wtfree(w->dec_lo_double_complex);
+        wtfree(w->dec_hi_double_complex);
+#endif
     }
     if (w->rec_len > 0)
     {
@@ -664,6 +875,12 @@ void free_discrete_wavelet(DiscreteWavelet *w){
         wtfree(w->rec_hi_float);
         wtfree(w->rec_lo_double);
         wtfree(w->rec_hi_double);
+#ifdef HAVE_C99_COMPLEX
+        wtfree(w->rec_lo_float_complex);
+        wtfree(w->rec_hi_float_complex);
+        wtfree(w->rec_lo_double_complex);
+        wtfree(w->rec_hi_double_complex);
+#endif
     }
     /* finally free struct */
     wtfree(w);

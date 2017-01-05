@@ -27,4 +27,14 @@
 #include "wavelets_coeffs.template.h"
 #undef TYPE
 
+#ifdef HAVE_C99_COMPLEX
+    #define TYPE float_complex
+    #include "wavelets_coeffs.template.h"
+    #undef TYPE
+
+    #define TYPE double_complex
+    #include "wavelets_coeffs.template.h"
+    #undef TYPE
+#endif
+
 #endif /* TYPE */
