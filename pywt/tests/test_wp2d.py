@@ -82,27 +82,6 @@ def test_collecting_nodes_2d():
     assert_(paths == expected_paths)
 
 
-def test_data_reconstruction_2d():
-    x = np.array([[1, 2, 3, 4, 5, 6, 7, 8]] * 8, dtype=np.float64)
-    wp = pywt.WaveletPacket2D(data=x, wavelet='db1', mode='symmetric')
-
-    new_wp = pywt.WaveletPacket2D(data=None, wavelet='db1', mode='symmetric')
-    new_wp['vh'] = wp['vh'].data
-    new_wp['vv'] = wp['vh'].data
-    new_wp['vd'] = np.zeros((2, 2), dtype=np.float64)
-    new_wp['a'] = [[3.0, 7.0, 11.0, 15.0]] * 4
-    new_wp['d'] = np.zeros((4, 4), dtype=np.float64)
-    new_wp['h'] = wp['h']       # all zeros
-
-    assert_allclose(new_wp.reconstruct(update=False),
-                    np.array([[1.5, 1.5, 3.5, 3.5, 5.5, 5.5, 7.5, 7.5]] * 8),
-                    rtol=1e-12)
-    assert_allclose(wp['va'].data, np.zeros((2, 2)) - 2, rtol=1e-12)
-
-    new_wp['va'] = wp['va'].data
-    assert_allclose(new_wp.reconstruct(update=False), x, rtol=1e-12)
-
-
 def test_data_reconstruction_delete_nodes_2d():
     x = np.array([[1, 2, 3, 4, 5, 6, 7, 8]] * 8, dtype=np.float64)
     wp = pywt.WaveletPacket2D(data=x, wavelet='db1', mode='symmetric')
@@ -123,6 +102,8 @@ def test_data_reconstruction_delete_nodes_2d():
     assert_allclose(new_wp.reconstruct(update=False), x, rtol=1e-12)
 
     del(new_wp['va'])
+    # TypeError on accessing deleted node
+    assert_raises(TypeError, lambda: new_wp['va'])
     new_wp['va'] = wp['va'].data
     assert_(new_wp.data is None)
 
