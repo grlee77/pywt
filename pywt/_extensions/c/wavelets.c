@@ -28,6 +28,12 @@ int is_discrete_wavelet(WAVELET_NAME name)
             return 1;
         case DMEY:
             return 1;
+        case BATT:
+            return 1;
+        case BELY:
+            return 1;
+        case VAID:
+            return 1;
         case GAUS:
             return 0;
         case MEXH:
@@ -138,6 +144,18 @@ DiscreteWavelet* discrete_wavelet(WAVELET_NAME name, unsigned int order)
             }
 
             break;
+        }
+
+        case BATT: {
+            /* TODO */
+        }
+
+        case BEYL: {
+            /* TODO */
+        }
+
+        case VAID: {
+            /* TODO */
         }
 
         /* Symlets wavelets family */
