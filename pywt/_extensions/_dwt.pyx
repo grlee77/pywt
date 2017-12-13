@@ -127,7 +127,6 @@ cpdef dec_filter_axis(np.ndarray data, np.ndarray filt, MODE mode,
     output_info.strides = <pywt_index_t *> c.strides
     output_info.shape = <size_t *> c.shape
 
-    # TODO: finish
     if data.dtype == np.float64:
         with nogil:
             retval = c_wt.double_down_filter_axis(

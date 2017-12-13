@@ -152,6 +152,7 @@ cpdef swt_axis(np.ndarray data, Wavelet wavelet, size_t level,
     cdef size_t end_level = start_level + level
     cdef int retval = -5
     cdef size_t i
+    cdef size_t dec_len = wavelet.dec_len
 
     if data.size % 2:
         raise ValueError("Length of data must be even.")
@@ -178,6 +179,8 @@ cpdef swt_axis(np.ndarray data, Wavelet wavelet, size_t level,
 
     output_info.ndim = data.ndim
 
+    data = data.astype(_check_dtype(data), copy=False)
+
     ret = []
     for i in range(start_level+1, end_level+1):
         cA = np.empty(output_shape, dtype=data.dtype)
@@ -187,43 +190,47 @@ cpdef swt_axis(np.ndarray data, Wavelet wavelet, size_t level,
         output_info.shape = <size_t *> cA.shape
         if data.dtype == np.float64:
             with nogil:
-                retval = c_wt.double_downcoef_axis(
+                retval = c_wt.double_down_filter_axis(
                     <double *> data.data, data_info,
                     <double *> cA.data, output_info,
-                    wavelet.w, axis,
-                    common.COEF_APPROX, common.MODE_PERIODIZATION,
-                    i, common.SWT_TRANSFORM)
+                    wavelet.w.dec_lo_double, dec_len, axis,
+                    1, common.MODE_PERIODIZATION,
+                    i,
+                    common.SWT_TRANSFORM)
             if retval:
                 raise RuntimeError(
                     "C wavelet transform failed with error code %d" % retval)
             with nogil:
-                retval = c_wt.double_downcoef_axis(
+                retval = c_wt.double_down_filter_axis(
                     <double *> data.data, data_info,
                     <double *> cD.data, output_info,
-                    wavelet.w, axis,
-                    common.COEF_DETAIL, common.MODE_PERIODIZATION,
-                    i, common.SWT_TRANSFORM)
+                    wavelet.w.dec_hi_double, dec_len, axis,
+                    1, common.MODE_PERIODIZATION,
+                    i,
+                    common.SWT_TRANSFORM)
             if retval:
                 raise RuntimeError(
                     "C wavelet transform failed with error code %d" % retval)
         elif data.dtype == np.float32:
             with nogil:
-                retval = c_wt.float_downcoef_axis(
+                retval = c_wt.float_down_filter_axis(
                     <float *> data.data, data_info,
                     <float *> cA.data, output_info,
-                    wavelet.w, axis,
-                    common.COEF_APPROX, common.MODE_PERIODIZATION,
-                    i, common.SWT_TRANSFORM)
+                    wavelet.w.dec_lo_float, dec_len, axis,
+                    1, common.MODE_PERIODIZATION,
+                    i,
+                    common.SWT_TRANSFORM)
             if retval:
                 raise RuntimeError(
                     "C wavelet transform failed with error code %d" % retval)
             with nogil:
-                retval = c_wt.float_downcoef_axis(
+                retval = c_wt.float_down_filter_axis(
                     <float *> data.data, data_info,
                     <float *> cD.data, output_info,
-                    wavelet.w, axis,
-                    common.COEF_DETAIL, common.MODE_PERIODIZATION,
-                    i, common.SWT_TRANSFORM)
+                    wavelet.w.dec_hi_float, dec_len, axis,
+                    1, common.MODE_PERIODIZATION,
+                    i,
+                    common.SWT_TRANSFORM)
             if retval:
                 raise RuntimeError(
                     "C wavelet transform failed with error code %d" % retval)
@@ -232,24 +239,26 @@ cpdef swt_axis(np.ndarray data, Wavelet wavelet, size_t level,
             if data.dtype == np.complex128:
                 cA = np.zeros(output_shape, dtype=np.complex128)
                 with nogil:
-                    retval = c_wt.double_complex_downcoef_axis(
-                        <double complex *> data.data, data_info,
-                        <double complex *> cA.data, output_info,
-                        wavelet.w, axis,
-                        common.COEF_APPROX, common.MODE_PERIODIZATION,
-                        i, common.SWT_TRANSFORM)
+                    retval = c_wt.double_complex_down_filter_axis(
+                        <double complex*> data.data, data_info,
+                        <double complex*> cA.data, output_info,
+                        wavelet.w.dec_lo_double, dec_len, axis,
+                        1, common.MODE_PERIODIZATION,
+                        i,
+                        common.SWT_TRANSFORM)
                 if retval:
                     raise RuntimeError(
                         "C wavelet transform failed with error code %d" %
                         retval)
                 cD = np.zeros(output_shape, dtype=np.complex128)
                 with nogil:
-                    retval = c_wt.double_complex_downcoef_axis(
-                        <double complex *> data.data, data_info,
-                        <double complex *> cD.data, output_info,
-                        wavelet.w, axis,
-                        common.COEF_DETAIL, common.MODE_PERIODIZATION,
-                        i, common.SWT_TRANSFORM)
+                    retval = c_wt.double_complex_down_filter_axis(
+                        <double complex*> data.data, data_info,
+                        <double complex*> cD.data, output_info,
+                        wavelet.w.dec_hi_double, dec_len, axis,
+                        1, common.MODE_PERIODIZATION,
+                        i,
+                        common.SWT_TRANSFORM)
                 if retval:
                     raise RuntimeError(
                         "C wavelet transform failed with error code %d" %
@@ -257,24 +266,26 @@ cpdef swt_axis(np.ndarray data, Wavelet wavelet, size_t level,
             elif data.dtype == np.complex64:
                 cA = np.zeros(output_shape, dtype=np.complex64)
                 with nogil:
-                    retval = c_wt.float_complex_downcoef_axis(
+                    retval = c_wt.float_complex_down_filter_axis(
                         <float complex *> data.data, data_info,
                         <float complex *> cA.data, output_info,
-                        wavelet.w, axis,
-                        common.COEF_APPROX, common.MODE_PERIODIZATION,
-                        i, common.SWT_TRANSFORM)
+                        wavelet.w.dec_lo_float, dec_len, axis,
+                        1, common.MODE_PERIODIZATION,
+                        i,
+                        common.SWT_TRANSFORM)
                 if retval:
                     raise RuntimeError(
                         "C wavelet transform failed with error code %d" %
                         retval)
                 cD = np.zeros(output_shape, dtype=np.complex64)
                 with nogil:
-                    retval = c_wt.float_complex_downcoef_axis(
+                    retval = c_wt.float_complex_down_filter_axis(
                         <float complex *> data.data, data_info,
                         <float complex *> cD.data, output_info,
-                        wavelet.w, axis,
-                        common.COEF_DETAIL, common.MODE_PERIODIZATION,
-                        i, common.SWT_TRANSFORM)
+                        wavelet.w.dec_hi_float, dec_len, axis,
+                        1, common.MODE_PERIODIZATION,
+                        i,
+                        common.SWT_TRANSFORM)
                 if retval:
                     raise RuntimeError(
                         "C wavelet transform failed with error code %d" %
