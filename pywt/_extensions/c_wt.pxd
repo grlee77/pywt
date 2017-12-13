@@ -12,12 +12,6 @@ include "config.pxi"
 
 cdef extern from "c/wt.h":
     # Cython does not know the 'restrict' keyword
-    cdef int double_downcoef_axis(const double * const input, const ArrayInfo input_info,
-                                  double * const output, const ArrayInfo output_info,
-                                  const DiscreteWavelet * const wavelet, const size_t axis,
-                                  const Coefficient detail, const MODE dwt_mode,
-                                  const size_t swt_level,
-                                  const DiscreteTransformType transform) nogil
     cdef int double_down_filter_axis(const double * const input, const ArrayInfo input_info,
                                      double * const output, const ArrayInfo output_info,
                                      const double * const filt, const size_t dec_len, const size_t axis,
@@ -56,12 +50,6 @@ cdef extern from "c/wt.h":
                           double * const output, pywt_index_t output_len, int level) nogil
 
 
-    cdef int float_downcoef_axis(const float * const input, const ArrayInfo input_info,
-                                 float * const output, const ArrayInfo output_info,
-                                 const DiscreteWavelet * const wavelet, const size_t axis,
-                                 const Coefficient detail, const MODE dwt_mode,
-                                 const size_t swt_level,
-                                 const DiscreteTransformType transform) nogil
     cdef int float_down_filter_axis(const float * const input, const ArrayInfo input_info,
                                     float * const output, const ArrayInfo output_info,
                                     const float * const filt, const size_t dec_len, const size_t axis,
@@ -101,12 +89,6 @@ cdef extern from "c/wt.h":
 
     IF HAVE_C99_CPLX:
         # complex variants only available if the compiler supports C99 complex
-        cdef int double_complex_downcoef_axis(const double complex * const input, const ArrayInfo input_info,
-                                      double complex * const output, const ArrayInfo output_info,
-                                      const DiscreteWavelet * const wavelet, const size_t axis,
-                                      const Coefficient detail, const MODE dwt_mode,
-                                      const size_t swt_level,
-                                      const DiscreteTransformType transform) nogil
         cdef int double_complex_down_filter_axis(const double complex * const input, const ArrayInfo input_info,
                                                  double complex * const output, const ArrayInfo output_info,
                                                  const double * const filt, const size_t dec_len, const size_t axis,
@@ -145,13 +127,6 @@ cdef extern from "c/wt.h":
                               double complex * const output, size_t output_len, int level) nogil
 
 
-
-        cdef int float_complex_downcoef_axis(const float complex * const input, const ArrayInfo input_info,
-                                     float complex * const output, const ArrayInfo output_info,
-                                     const DiscreteWavelet * const wavelet, const size_t axis,
-                                     const Coefficient detail, const MODE dwt_mode,
-                                     const size_t swt_level,
-                                     const DiscreteTransformType transform) nogil
         cdef int float_complex_down_filter_axis(const float complex * const input, const ArrayInfo input_info,
                                                  float complex * const output, const ArrayInfo output_info,
                                                  const float * const filt, const size_t dec_len, const size_t axis,

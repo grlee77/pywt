@@ -23,13 +23,6 @@
 /* _a suffix - wavelet transform approximations */
 /* _d suffix - wavelet transform details */
 
-int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo input_info,
-                              TYPE * const restrict output, const ArrayInfo output_info,
-                              const DiscreteWavelet * const restrict wavelet, const size_t axis,
-                              const Coefficient detail, const MODE dwt_mode,
-                              const size_t swt_level,
-                              const DiscreteTransformType transform);
-
 int CAT(TYPE, _down_filter_axis)(const TYPE * const restrict input, const ArrayInfo input_info,
                                  TYPE * const restrict output, const ArrayInfo output_info,
                                  const REAL_TYPE * const restrict filt, const size_t dec_len, const size_t axis,
