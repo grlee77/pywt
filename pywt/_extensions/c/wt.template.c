@@ -168,6 +168,128 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
 }
 
 
+int CAT(TYPE, _down_filter_axis)(const TYPE * const restrict input, const ArrayInfo input_info,
+                                 TYPE * const restrict output, const ArrayInfo output_info,
+                                 const REAL_TYPE * const restrict filt, const size_t dec_len, const size_t axis,
+                                 const size_t down, const MODE dwt_mode,
+                                 const size_t swt_level,
+                                 const DiscreteTransformType transform){
+    size_t i;
+    size_t num_loops = 1;
+    TYPE * temp_input = NULL, * temp_output = NULL;
+
+    // These are boolean values, but MSVC does not have <stdbool.h>
+    int make_temp_input, make_temp_output;
+
+    if (input_info.ndim != output_info.ndim)
+        return 1;
+    if (axis >= input_info.ndim)
+        return 2;
+
+    for (i = 0; i < input_info.ndim; ++i){
+        if (i == axis){
+            switch (transform) {
+            case DWT_TRANSFORM:
+                if (dwt_buffer_length(input_info.shape[i], dec_len,
+                                      dwt_mode) != output_info.shape[i])
+                    return 3;
+                break;
+            case SWT_TRANSFORM:
+                if (swt_buffer_length(input_info.shape[i])
+                    != output_info.shape[i])
+                    return 4;
+                break;
+            }
+        } else {
+            if (input_info.shape[i] != output_info.shape[i])
+                return 5;
+        }
+    }
+
+    make_temp_input = input_info.strides[axis] != sizeof(TYPE);
+    make_temp_output = output_info.strides[axis] != sizeof(TYPE);
+    if (make_temp_input)
+        if ((temp_input = malloc(input_info.shape[axis] * sizeof(TYPE))) == NULL)
+            goto cleanup;
+    if (make_temp_output)
+        if ((temp_output = malloc(output_info.shape[axis] * sizeof(TYPE))) == NULL)
+            goto cleanup;
+
+    for (i = 0; i < output_info.ndim; ++i){
+        if (i != axis)
+            num_loops *= output_info.shape[i];
+    }
+
+    for (i = 0; i < num_loops; ++i){
+        size_t j;
+        size_t input_offset = 0, output_offset = 0;
+        const TYPE * input_row;
+        TYPE * output_row;
+
+        // Calculate offset into linear buffer
+        {
+            size_t reduced_idx = i;
+            for (j = 0; j < output_info.ndim; ++j){
+                size_t j_rev = output_info.ndim - 1 - j;
+                if (j_rev != axis){
+                    size_t axis_idx = reduced_idx % output_info.shape[j_rev];
+                    reduced_idx /= output_info.shape[j_rev];
+
+                    input_offset += (axis_idx * input_info.strides[j_rev]);
+                    output_offset += (axis_idx * output_info.strides[j_rev]);
+                }
+            }
+        }
+
+        // Copy to temporary input if necessary
+        if (make_temp_input)
+            for (j = 0; j < input_info.shape[axis]; ++j)
+                // Offsets are byte offsets, to need to cast to char and back
+                temp_input[j] = *(TYPE *)(((char *) input) + input_offset
+                                          + j * input_info.strides[axis]);
+
+        // Select temporary or direct output and input
+        input_row = make_temp_input ? temp_input
+            : (const TYPE *)((const char *) input + input_offset);
+        output_row = make_temp_output ? temp_output
+            : (TYPE *)((char *) output + output_offset);
+
+
+        switch (transform) {
+            case DWT_TRANSFORM:
+                // Apply along axis
+                CAT(TYPE, _downsampling_convolution)(
+                    input_row, input_info.shape[axis],
+                    filt,
+                    dec_len, output_row, down, dwt_mode);
+                break;
+
+            case SWT_TRANSFORM:
+                CAT(TYPE, _swt_)(input_row, input_info.shape[axis],
+                                 filt, dec_len,
+                                 output_row, output_info.shape[axis],
+                                 swt_level);
+                break;
+        }
+        // Copy from temporary output if necessary
+        if (make_temp_output)
+            for (j = 0; j < output_info.shape[axis]; ++j)
+                // Offsets are byte offsets, to need to cast to char and back
+                *(TYPE *)((char *) output + output_offset
+                          + j * output_info.strides[axis]) = output_row[j];
+    }
+
+    free(temp_input);
+    free(temp_output);
+    return 0;
+
+ cleanup:
+    free(temp_input);
+    free(temp_output);
+    return 6;
+}
+
+
 int CAT(TYPE, _idwt_axis)(const TYPE * const restrict coefs_a, const ArrayInfo * const a_info,
                           const TYPE * const restrict coefs_d, const ArrayInfo * const d_info,
                           TYPE * const restrict output, const ArrayInfo output_info,

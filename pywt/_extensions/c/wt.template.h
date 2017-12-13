@@ -30,6 +30,13 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
                               const size_t swt_level,
                               const DiscreteTransformType transform);
 
+int CAT(TYPE, _down_filter_axis)(const TYPE * const restrict input, const ArrayInfo input_info,
+                                 TYPE * const restrict output, const ArrayInfo output_info,
+                                 const REAL_TYPE * const restrict filt, const size_t dec_len, const size_t axis,
+                                 const size_t down, const MODE dwt_mode,
+                                 const size_t swt_level,
+                                 const DiscreteTransformType transform);
+
 // a_info and d_info are pointers, as they may be NULL
 int CAT(TYPE, _idwt_axis)(const TYPE * const restrict coefs_a, const ArrayInfo * a_info,
                           const TYPE * const restrict coefs_d, const ArrayInfo * d_info,
@@ -64,6 +71,11 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
                      const DiscreteWavelet * const restrict wavelet, const MODE mode);
 
 /* SWT decomposition at given level */
+int CAT(TYPE, _swt_)(const TYPE * const restrict input, pywt_index_t input_len,
+                     const REAL_TYPE * const restrict filter, pywt_index_t filter_len,
+                     TYPE * const restrict output, size_t output_len,
+                     unsigned int level);
+
 int CAT(TYPE, _swt_a)(const TYPE * const restrict input, pywt_index_t input_len,
                       const DiscreteWavelet * const restrict wavelet,
                       TYPE * const restrict output, pywt_index_t output_len,

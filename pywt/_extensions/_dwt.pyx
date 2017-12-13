@@ -170,6 +170,86 @@ cpdef dwt_axis(np.ndarray data, Wavelet wavelet, MODE mode, unsigned int axis=0)
     return (cA, cD)
 
 
+cpdef dec_filter_axis(np.ndarray data, np.ndarray filt, MODE mode,
+                      unsigned int axis=0, unsigned int down=2):
+    # memory-views do not support n-dimensional arrays, use np.ndarray instead
+    cdef common.ArrayInfo data_info, output_info
+    cdef np.ndarray c
+    # Explicit input_shape necessary to prevent memory leak
+    cdef size_t[::1] input_shape, output_shape
+    cdef int retval = -5
+    cdef size_t dec_len = filt.size
+
+    data = data.astype(_check_dtype(data), copy=False)
+
+    input_shape = <size_t [:data.ndim]> <size_t *> data.shape
+
+    output_shape = input_shape.copy()
+    output_shape[axis] = common.dwt_buffer_length(data.shape[axis], dec_len, mode)
+
+    c = np.empty(output_shape, data.dtype)
+
+    data_info.ndim = data.ndim
+    data_info.strides = <pywt_index_t *> data.strides
+    data_info.shape = <size_t *> data.shape
+
+    output_info.ndim = c.ndim
+    output_info.strides = <pywt_index_t *> c.strides
+    output_info.shape = <size_t *> c.shape
+
+    # TODO: finish
+    if data.dtype == np.float64:
+        with nogil:
+            retval = c_wt.double_down_filter_axis(
+                <double *> data.data, data_info,
+                <double *> c.data, output_info,
+                <double *> filt.data, dec_len, axis,
+                down, mode,
+                0,
+                common.DWT_TRANSFORM)
+        if retval:
+            raise RuntimeError("C wavelet transform failed")
+    elif data.dtype == np.float32:
+        with nogil:
+            retval = c_wt.float_down_filter_axis(
+                <float *> data.data, data_info,
+                <float *> c.data, output_info,
+                <float *> filt.data, dec_len, axis,
+                down, mode,
+                0,
+                common.DWT_TRANSFORM)
+        if retval:
+            raise RuntimeError("C wavelet transform failed")
+    IF HAVE_C99_CPLX:
+        if data.dtype == np.complex64:
+            with nogil:
+                retval = c_wt.float_complex_down_filter_axis(
+                    <float complex *> data.data, data_info,
+                    <float complex *> c.data, output_info,
+                    <float *> filt.data, dec_len, axis,
+                    down, mode,
+                    0,
+                    common.DWT_TRANSFORM)
+            if retval:
+                raise RuntimeError("C wavelet transform failed")
+        elif data.dtype == np.complex128:
+            with nogil:
+                retval = c_wt.double_complex_down_filter_axis(
+                    <double complex *> data.data, data_info,
+                    <double complex *> c.data, output_info,
+                    <double *> filt.data, dec_len, axis,
+                    down, mode,
+                    0,
+                    common.DWT_TRANSFORM)
+            if retval:
+                raise RuntimeError("C wavelet transform failed")
+
+    if retval == -5:
+        raise TypeError("Array must be floating point, not {}"
+                        .format(data.dtype))
+    return c
+
+
 cpdef idwt_single(np.ndarray cA, np.ndarray cD, Wavelet wavelet, MODE mode):
     cdef size_t input_len, rec_len
     cdef int retval
