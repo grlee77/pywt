@@ -84,89 +84,19 @@ cpdef dwt_axis(np.ndarray data, Wavelet wavelet, MODE mode, unsigned int axis=0)
     # Explicit input_shape necessary to prevent memory leak
     cdef size_t[::1] input_shape, output_shape
     cdef int retval = -5
+    cdef size_t i
 
     data = data.astype(_check_dtype(data), copy=False)
 
-    input_shape = <size_t [:data.ndim]> <size_t *> data.shape
-    output_shape = input_shape.copy()
-    output_shape[axis] = common.dwt_buffer_length(data.shape[axis], wavelet.dec_len, mode)
+    filt_lo = np.empty((wavelet.dec_len, ), data.real.dtype)
+    filt_hi = np.empty((wavelet.dec_len, ), data.real.dtype)
+    for i in range(wavelet.dec_len):
+        filt_lo[i] = wavelet.dec_lo[i]
+        filt_hi[i] = wavelet.dec_hi[i]
 
-    cA = np.empty(output_shape, data.dtype)
-    cD = np.empty(output_shape, data.dtype)
+    cA = dec_filter_axis(data, filt_lo, mode, axis, 2)
+    cD = dec_filter_axis(data, filt_hi, mode, axis, 2)
 
-    data_info.ndim = data.ndim
-    data_info.strides = <pywt_index_t *> data.strides
-    data_info.shape = <size_t *> data.shape
-
-    output_info.ndim = cA.ndim
-    output_info.strides = <pywt_index_t *> cA.strides
-    output_info.shape = <size_t *> cA.shape
-
-    if data.dtype == np.float64:
-        with nogil:
-            retval = c_wt.double_downcoef_axis(<double *> data.data, data_info,
-                                         <double *> cA.data, output_info,
-                                         wavelet.w, axis, common.COEF_APPROX, mode,
-                                         0, common.DWT_TRANSFORM)
-        if retval:
-            raise RuntimeError("C wavelet transform failed")
-        with nogil:
-            retval = c_wt.double_downcoef_axis(<double *> data.data, data_info,
-                                     <double *> cD.data, output_info,
-                                     wavelet.w, axis, common.COEF_DETAIL, mode,
-                                     0, common.DWT_TRANSFORM)
-        if retval:
-            raise RuntimeError("C wavelet transform failed")
-    elif data.dtype == np.float32:
-        with nogil:
-            retval = c_wt.float_downcoef_axis(<float *> data.data, data_info,
-                                    <float *> cA.data, output_info,
-                                    wavelet.w, axis, common.COEF_APPROX, mode,
-                                    0, common.DWT_TRANSFORM)
-        if retval:
-            raise RuntimeError("C wavelet transform failed")
-        with nogil:
-            retval = c_wt.float_downcoef_axis(<float *> data.data, data_info,
-                                    <float *> cD.data, output_info,
-                                    wavelet.w, axis, common.COEF_DETAIL, mode,
-                                    0, common.DWT_TRANSFORM)
-        if retval:
-            raise RuntimeError("C wavelet transform failed")
-    IF HAVE_C99_CPLX:
-        if data.dtype == np.complex64:
-            with nogil:
-                retval = c_wt.float_complex_downcoef_axis(<float complex *> data.data, data_info,
-                                        <float complex *> cA.data, output_info,
-                                        wavelet.w, axis, common.COEF_APPROX, mode,
-                                        0, common.DWT_TRANSFORM)
-            if retval:
-                raise RuntimeError("C wavelet transform failed")
-            with nogil:
-                retval = c_wt.float_complex_downcoef_axis(<float complex *> data.data, data_info,
-                                        <float complex *> cD.data, output_info,
-                                        wavelet.w, axis, common.COEF_DETAIL, mode,
-                                        0, common.DWT_TRANSFORM)
-            if retval:
-                raise RuntimeError("C wavelet transform failed")
-        elif data.dtype == np.complex128:
-            with nogil:
-                retval = c_wt.double_complex_downcoef_axis(<double complex *> data.data, data_info,
-                                             <double complex *> cA.data, output_info,
-                                             wavelet.w, axis, common.COEF_APPROX, mode,
-                                             0, common.DWT_TRANSFORM)
-            if retval:
-                raise RuntimeError("C wavelet transform failed")
-            with nogil:
-                retval = c_wt.double_complex_downcoef_axis(<double complex *> data.data, data_info,
-                                         <double complex *> cD.data, output_info,
-                                         wavelet.w, axis, common.COEF_DETAIL, mode,
-                                         0, common.DWT_TRANSFORM)
-            if retval:
-                raise RuntimeError("C wavelet transform failed")
-
-    if retval == -5:
-        raise TypeError("Array must be floating point, not {}"
-                        .format(data.dtype))
     return (cA, cD)
 
 
