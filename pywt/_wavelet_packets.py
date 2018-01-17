@@ -523,8 +523,11 @@ class NodeND(BaseNode):
     """
     WaveletPacket tree node.
 
-    Subnodes are called 'a' (LL), 'h' (HL), 'v' (LH) and  'd' (HH), like
-    approximation and detail coefficients in the 2D Discrete Wavelet Transform
+    Unlike Node and Node2D self.PARTS is a dictionary.
+    For 1D:  self.PARTS has keys 'a' and 'd'
+    For 2D:  self.PARTS has keys 'aa', 'ad', 'da', 'dd'
+    For 3D:  self.PARTS has keys 'aaa', 'aad', 'ada', 'daa', ..., 'ddd'
+
     """
     def __init__(self, parent, data, node_name, ndim):
         super(NodeND, self).__init__(parent=parent, data=data,
@@ -534,8 +537,6 @@ class NodeND(BaseNode):
             self.PARTS[''.join(key)] = None
         self.PART_LEN = ndim
         self.ndim = ndim
-        #for part in self.PARTS:
-        #    eval("self.{0} = '{0}'".format(part))  # TODO: don't use this method.  try LEAF_DICT or something similar instead
 
     def _init_subnodes(self):
         # need this empty so the BaseNode's _init_subnodes isn't called during
