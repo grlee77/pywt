@@ -271,9 +271,9 @@ class BaseNode(object):
                 subnode[path[self.PART_LEN:]] = data
             else:
                 if isinstance(data, BaseNode):
-                    self.data = np.asarray(data.data, dtype=np.float64)
+                    self.data = np.asarray(data.data)
                 else:
-                    self.data = np.asarray(data, dtype=np.float64)
+                    self.data = np.asarray(data)
         else:
             raise TypeError("Invalid path parameter type - expected string but"
                             " got %s." % type(path))
@@ -664,7 +664,7 @@ class WaveletPacket(Node):
         self.mode = mode
 
         if data is not None:
-            data = np.asarray(data, dtype=np.float64)
+            data = np.asarray(data)
             assert data.ndim == 1
             self.data_size = data.shape[0]
             if maxlevel is None:
@@ -766,7 +766,7 @@ class WaveletPacket2D(Node2D):
         self.mode = mode
 
         if data is not None:
-            data = np.asarray(data, dtype=np.float64)
+            data = np.asarray(data)
             assert data.ndim == 2
             self.data_size = data.shape
             if maxlevel is None:
@@ -877,7 +877,7 @@ class WaveletPacketND(NodeND):
         self.mode = mode
 
         if data is not None:
-            data = np.asarray(data, dtype=np.float64)
+            data = np.asarray(data)
             if data.ndim == 0:
                 raise ValueError("data must be at least 1D")
             self.data_size = data.shape
