@@ -53,26 +53,37 @@ def cost_l1(c):
     return np.sum(np.abs(c))
 
 
-def cost_lp(c, p=1.5):
-    """Cost based on the lp-norm of the values in c
+def cost_lp(c, p=0.5):
+    """Cost based on the lp-norm of the values in c.
+
+    This cost is equivalent to ``np.linalg.norm(c, ord=p)**p`` which is
+    equivalent to ``np.sum(np.abs(c)**p)``.
 
     Parameters
     ----------
     c : np.ndarray
         Signal coefficients.
     p : float
-        The exponent used in the norm (i.e. `ord` for `np.linalg.norm`).
+        The exponent used in the norm (i.e. `ord` for `np.linalg.norm`).  In
+        practice, this should typically be in the range [0, 2].
 
     Returns
     -------
     cost : float
         The cost.
     """
-    if p == 1:
+    if p == 0:
+        return np.sum(c != 0)
+    elif p == 1:
         return cost_l1(c)
+    elif p < 0:
+        raise ValueError("p must be non-negative.")
     c = np.atleast_1d(c)
     c = np.asarray(c, dtype=np.result_type(c.dtype, np.float32))
-    return np.linalg.norm(c.ravel(order='K'), ord=p)
+    # return np.linalg.norm(c.ravel(order='K'), ord=p)
+    c = np.abs(c)
+    np.power(c, p, out=c)
+    return np.sum(c)
 
 
 def cost_entropy(c):
@@ -218,3 +229,14 @@ if False:
     c3 = pywt.coeffs_to_array(c3)[0]
     print(cost_entropy(r))
     print(cost_entropy(c3))
+
+    from pywt._wavelet_packet_cost import cost_entropy, cost_gauss_markov, cost_lp, cost_thresh
+    s = np.ones(16) * 0.25
+    e1 = cost_entropy(s)
+    print(e1)  # 2,7726
+    e2 = cost_lp(s, p=1.5)
+    print(e2)  # 2.0  # to Match Matlab implementation, need:  e2**p instead
+    e3 = cost_gauss_markov(s)
+    print(e3)  # -44.3614
+    e4 = cost_thresh(s, thresh=0.24)
+    print(e4)  # 16
