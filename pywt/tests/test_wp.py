@@ -4,7 +4,7 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 from numpy.testing import (run_module_suite, assert_allclose, assert_,
-                           assert_raises)
+                           assert_raises, assert_equal)
 
 import pywt
 
@@ -141,6 +141,25 @@ def test_removing_nodes():
         assert_allclose(dataleafs[i], expected[i, :], atol=1e-12)
 
     assert_allclose(wp.reconstruct(), np.arange(1, 9), rtol=1e-12)
+
+
+def test_wavelet_packet_dtypes():
+    N = 32
+    for dtype in [np.float32, np.float64, np.complex64, np.complex128]:
+        x = np.random.randn(N).astype(dtype)
+        if np.iscomplexobj(x):
+            x = x + 1j*np.random.randn(N).astype(x.real.dtype)
+        wp = pywt.WaveletPacket(data=x, wavelet='db1', mode='symmetric')
+        # no unnecessary copy made
+        assert_(wp.data is x)
+
+        # full decomposition
+        wp.get_level(wp.maxlevel)
+
+        # recontsruct from coefficients should preserve dtype
+        r = wp.reconstruct(False)
+        assert_equal(r.dtype, x.dtype)
+        assert_allclose(r, x, atol=1e-6, rtol=1e-6)
 
 
 if __name__ == '__main__':
