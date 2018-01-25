@@ -7,9 +7,24 @@ from functools import reduce
 import operator
 import numpy as np
 from numpy.testing import (run_module_suite, assert_allclose, assert_,
-                           assert_raises)
+                           assert_raises, assert_equal)
 
 import pywt
+
+
+def _wavedecn_keys(ndim, level):
+    # return wavelet packet keys corresponding to a wavedecn decomposition
+    from itertools import product
+    approx = ''
+    coeffs = {}
+    for lev in range(level):
+        for k in product('ad', repeat=ndim):
+            k = ''.join(k)
+            coeffs[approx + k] = None
+        approx = 'a' * (ndim * (lev + 1))
+        if lev < level - 1:
+            coeffs.pop(approx)
+    return list(coeffs.keys())
 
 
 def test_traversing_tree_nd():
@@ -124,6 +139,31 @@ def test_wavelet_packet_dtypes():
         r = wp.reconstruct(False)
         assert_equal(r.dtype, x.dtype)
         assert_allclose(r, x, atol=1e-6, rtol=1e-6)
+
+
+def test_trim_leaf_nodes_nd():
+    """Test pruning of a decomposition down to a specified set of keys."""
+    atol = rtol = 1e-12
+    x = np.random.randn(16, 16, 16)
+    wp = pywt.WaveletPacketND(x, 'db2', mode='periodization')
+    level = 2
+    wp.get_level(level)
+    leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+
+    # wavedecn has fewer nodes than a full wavelet packet decomposition
+    dwt_leaf_names = _wavedecn_keys(x.ndim, level)
+    assert_(len(dwt_leaf_names) < len(leaf_names))
+
+    # trim the decomposition to match the DWT
+    wp.trim_nodes(leaf_names=dwt_leaf_names)
+
+    # verify that the leaf nodes now match those used during trimming
+    trimmed_leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+    assert_equal(sorted(trimmed_leaf_names),
+                 sorted(dwt_leaf_names))
+    # verify perfect reconstruction from this modified basis
+    r = wp.reconstruct()
+    assert_allclose(x, r, atol=atol, rtol=rtol)
 
 
 if __name__ == '__main__':
