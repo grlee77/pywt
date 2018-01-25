@@ -9,6 +9,19 @@ from numpy.testing import (run_module_suite, assert_allclose, assert_,
 import pywt
 
 
+def _wavedec2_keys(level):
+    # return wavelet packet keys corresponding to a wavedec2 decomposition
+    approx = ''
+    coeffs = {}
+    for lev in range(level):
+        for k in ['a', 'h', 'v', 'd']:
+            coeffs[approx + k] = None
+        approx = 'a' * (lev + 1)
+        if lev < level - 1:
+            coeffs.pop(approx)
+    return list(coeffs.keys())
+
+
 def test_traversing_tree_2d():
     x = np.array([[1, 2, 3, 4, 5, 6, 7, 8]] * 8, dtype=np.float64)
     wp = pywt.WaveletPacket2D(data=x, wavelet='db1', mode='symmetric')
@@ -195,6 +208,32 @@ def test_wavelet_packet_axes():
                   axes=(0, ))
     assert_raises(ValueError, pywt.WaveletPacket2D, data=x, wavelet='db1',
                   axes=(0, 1, 2))
+
+
+def test_trim_leaf_nodes_2d():
+    """Test pruning of a decomposition down to a specified set of keys."""
+    atol = rtol = 1e-12
+    x = np.random.randn(64, 64)
+    for mode in ['periodization', 'symmetric']:
+        wp = pywt.WaveletPacket2D(x, 'db2', mode=mode)
+        level = 3
+        wp.get_level(level)
+        leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+
+        # wavedec2 has fewer nodes than a full wavelet packet decomposition
+        wavedec2_leaf_names = _wavedec2_keys(level)
+        assert_(len(wavedec2_leaf_names) < len(leaf_names))
+
+        # trim the decomposition to match the DWT
+        wp.trim_nodes(leaf_names=wavedec2_leaf_names)
+
+        # verify that the leaf nodes now match those used during trimming
+        trimmed_leaves = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+        assert_equal(sorted(trimmed_leaves),
+                     sorted(wavedec2_leaf_names))
+        # verify perfect reconstruction from this modified basis
+        r = wp.reconstruct()
+        assert_allclose(x, r, atol=atol, rtol=rtol)
 
 
 if __name__ == '__main__':
