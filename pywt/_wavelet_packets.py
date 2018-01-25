@@ -330,6 +330,27 @@ class BaseNode(object):
         self.walk(collect, decompose=decompose)
         return result
 
+    def trim_nodes(self, leaf_names, decompose=True):
+        """Prunes the tree, removing any nodes below leaf_names from the tree.
+
+        Parameters
+        ----------
+        decompose : bool, optional
+            (default: True)
+        """
+        result = []
+
+        def trim_subnodes(node):
+            if node.path in leaf_names:
+                result.append(node)
+                if node.has_any_subnode:
+                    for part in self.PARTS:
+                        node._delete_node(part)
+                return False
+            return True
+        self.walk(trim_subnodes, decompose=decompose)
+        return result
+
     def walk(self, func, args=(), kwargs=None, decompose=True):
         """
         Traverses the decomposition tree and calls
@@ -795,6 +816,7 @@ class WaveletPacket2D(Node2D):
             return data
         return self.data  # return original data
 
+
     def get_level(self, level, order="natural", decompose=True):
         """
         Returns all nodes from specified level.
@@ -827,7 +849,6 @@ class WaveletPacket2D(Node2D):
             return True
 
         self.walk(collect, decompose=decompose)
-
         if order == "freq":
             nodes = {}
             for (row_path, col_path), node in [
