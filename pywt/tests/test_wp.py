@@ -157,9 +157,10 @@ def test_removing_nodes():
 
 
 def test_wavelet_packet_dtypes():
+    rstate = np.random.RandomState(0)
     N = 32
     for dtype in [np.float32, np.float64, np.complex64, np.complex128]:
-        x = np.random.randn(N).astype(dtype)
+        x = rstate.randn(N).astype(dtype)
         if np.iscomplexobj(x):
             x = x + 1j*np.random.randn(N).astype(x.real.dtype)
         wp = pywt.WaveletPacket(data=x, wavelet='db1', mode='symmetric')
@@ -173,6 +174,27 @@ def test_wavelet_packet_dtypes():
         r = wp.reconstruct(False)
         assert_equal(r.dtype, x.dtype)
         assert_allclose(r, x, atol=1e-6, rtol=1e-6)
+
+
+def test_wavelet_packet_axis():
+    rstate = np.random.RandomState(0)
+    shape = (32, 16)
+    for axis in [0, 1, -1]:
+        x = rstate.standard_normal(shape)
+        wp = pywt.WaveletPacket(data=x, wavelet='db1', mode='symmetric',
+                                axis=axis)
+
+        # full decomposition
+        wp.get_level(wp.maxlevel)
+
+        # recontsruct from coefficients should preserve dtype
+        r = wp.reconstruct(False)
+        assert_equal(r.dtype, x.dtype)
+        assert_allclose(r, x, atol=1e-12, rtol=1e-12)
+
+    # ValueError if axis is out of range
+    assert_raises(ValueError, pywt.WaveletPacket, data=x, wavelet='db1',
+                  axis=x.ndim)
 
 
 def test_trim_leaf_nodes_1d():

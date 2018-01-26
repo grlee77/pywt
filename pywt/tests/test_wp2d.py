@@ -158,6 +158,31 @@ def test_wavelet_packet_dtypes():
         assert_allclose(r, x, atol=1e-6, rtol=1e-6)
 
 
+def test_wavelet_packet_axes():
+    rstate = np.random.RandomState(0)
+    shape = (32, 16)
+    for axes in [(0, 1), (1, 0), (-2, 1)]:
+        x = rstate.standard_normal(shape)
+        wp = pywt.WaveletPacket2D(data=x, wavelet='db1', mode='symmetric',
+                                  axes=axes)
+
+        # full decomposition
+        wp.get_level(wp.maxlevel)
+
+        # recontsruct from coefficients should preserve dtype
+        r = wp.reconstruct(False)
+        assert_equal(r.dtype, x.dtype)
+        assert_allclose(r, x, atol=1e-12, rtol=1e-12)
+
+    # must have two non-duplicate axes
+    assert_raises(ValueError, pywt.WaveletPacket2D, data=x, wavelet='db1',
+                  axes=(0, 0))
+    assert_raises(ValueError, pywt.WaveletPacket2D, data=x, wavelet='db1',
+                  axes=(0, ))
+    assert_raises(ValueError, pywt.WaveletPacket2D, data=x, wavelet='db1',
+                  axes=(0, 1, 2))
+
+
 def test_trim_leaf_nodes_2d():
     """Test pruning of a decomposition down to a specified set of keys."""
     atol = rtol = 1e-12
