@@ -1,7 +1,6 @@
 # Copyright (c) 2017 The PyWavelets Developers
 #                    <https://github.com/PyWavelets/pywt>
 # See COPYING for license details.
-import numpy as np
 import sys
 from collections import Iterable
 
@@ -14,9 +13,6 @@ if sys.version_info[0] == 3:
     string_types = str,
 else:
     string_types = basestring,
-
-
-__all__ = ['demo_function']
 
 
 def _as_wavelet(wavelet):
@@ -101,54 +97,3 @@ def _modes_per_axis(modes, axes):
     else:
         raise ValueError("modes must be a str, Mode enum or iterable")
     return modes
-
-
-def demo_function(n, name='Bumps'):
-    """Simple 1D wavelet test functions.
-
-    This set of test functions were originally proposed in [1]_.
-
-    Parameters
-    ----------
-    n : int
-        The length of the test signal.
-    name : {'Blocks', 'Bumps', 'HeaviSine', 'Doppler'}
-        The type of test signal to generate (`name` is case-insensitive).
-
-    Returns
-    -------
-    f : np.ndarray
-        Array of length ``n`` corresponding to the specified test signal type.
-
-    References
-    ----------
-    .. [1] D.L. Donoho and I.M. Johnstone.  Ideal spatial adaptation by
-        wavelet shrinkage. Biometrika, vol. 81, pp. 425–455, 1994.
-    """
-
-    if n < 1 or (n % 1) != 0:
-        raise ValueError("n must be an integer >= 1")
-    # t = np.linspace(0, 1, n)
-    t = np.arange(0, 1, 1/n)
-    name = name.lower()
-    if name == "blocks":
-        t0s = [0.1, 0.13, 0.15, 0.23, 0.25, 0.4, 0.44, 0.65, 0.76, 0.78, 0.81]
-        hs = [4, -5, 3, -4, 5, -4.2, 2.1, 4.3, -3.1, 2.1, -4.2]
-        f = 0
-        for (t0, h) in zip(t0s, hs):
-            f += h * (1 + np.sign(t - t0)) / 2
-    elif name == "bumps":
-        t0s = [0.1, 0.13, 0.15, 0.23, 0.25, 0.4, 0.44, 0.65, 0.76, 0.78, 0.81]
-        hs = [4, 5, 3, 4, 5, 4.2, 2.1, 4.3, 3.1, 5.1, 4.2]
-        ws = [0.005, 0.005, 0.006, 0.01, 0.01, 0.03, 0.01, 0.01, 0.005, 0.008,
-              0.005]
-        f = 0
-        for (t0, h, w) in zip(t0s, hs, ws):
-            f += h / (1 + np.abs((t - t0) / w))**4
-    elif name == "heavisine":
-        f = 4 * np.sin(4 * np.pi * t) - np.sign(t - 0.3) - np.sign(0.72 - t)
-    elif name == "doppler":
-        f = np.sqrt(t * (1 - t)) * np.sin(2 * np.pi * 1.05 / (t + 0.05))
-    else:
-        raise ValueError("unknown test function")
-    return f
