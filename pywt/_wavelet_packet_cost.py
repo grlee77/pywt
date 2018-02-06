@@ -190,6 +190,83 @@ def theoretical_dimension(c):
     return np.exp(d)
 
 
+def cost_pq_mean(c, p=1, q=2):
+    """The pq-mean is based on the ratio of two norms.
+
+    This cost is equivalent to
+    ``np.linalg.norm(c, ord=p) / np.linalg.norm(c, ord=q)``.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        Signal coefficients.
+    p : float
+        The exponent used in the norm (i.e. `ord` for `np.linalg.norm`).  In
+        practice, this should typically be in the range [0, 2].
+
+    Returns
+    -------
+    cost : float
+        The cost.
+
+    Notes
+    -----
+    This norm satisfies the desirable properties as a measure of sparsity
+    when p<=1, q > 1 [1]_.  Note that the sign of the output of this function
+    is the negative of the sparsity measure in Table I of [1]_.
+
+    References
+    ----------
+    .. [1] N. Hurley and S. Rickard. Comparing Measures of Sparsity. IEEE
+        Transactions on Information Theory, Vol. 55, No. 10, 2009.
+    """
+    if p >= q:
+        raise ValueError("p must be less than q.")
+    # cost = -np.linalg.norm(c, ord=q)
+    # cost /= np.linalg.norm(c, ord=p)
+    c = np.abs(c)
+    cost = np.mean(c**p)**(1/p)
+    cost *= np.mean(c**q)**(-1/q)
+    return cost
+
+
+def cost_gini(c):
+    """Cost corresponding to the Gini Index.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        Signal coefficients.
+
+    Returns
+    -------
+    cost : float
+        The cost.
+
+    Notes
+    -----
+    The Gini Index was initially proposed as a measure of wealth inequality
+    [1]_. Its suitability as a measure of sparsity was demonstrated in [2]_.
+    Note that the sign of the output of this function is the negative of the
+    sparsity measure in Table I of [1]_.
+
+    References
+    ----------
+    .. [1] C. Gini.  Measurement of inequality of incomes. Econom. J., vol. 31,
+        pp. 124–126, 1921.
+    .. [2] N. Hurley and S. Rickard. Comparing Measures of Sparsity. IEEE
+        Transactions on Information Theory, Vol. 55, No. 10, 2009.
+    """
+    ca = np.abs(c.ravel())
+    ca = np.sort(ca)  # sorted (ascending magnitude)
+    l1 = np.sum(ca)
+
+    n = c.size
+    term2 = (n + 0.5 - np.arange(1, c.size + 1))
+    term2 /= (n * l1)
+    return -(1 - 2 * np.sum(ca * term2))
+
+
 if False:
     # TODO: remove this demo
     import numpy as np
