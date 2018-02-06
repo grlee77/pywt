@@ -364,7 +364,8 @@ class BaseNode(object):
         self.walk(trim_subnodes, decompose=decompose)
         return result
 
-    def walk(self, func, args=(), kwargs=None, decompose=True, cost_func=None):
+    def walk(self, func, args=(), kwargs=None, decompose=True, cost_func=None,
+             additive_cost=True):
         """
         Traverses the decomposition tree and calls
         ``func(node, *args, **kwargs)`` on every node. If `func` returns True,
@@ -397,7 +398,13 @@ class BaseNode(object):
                         subnodes = [sn for sn in subnodes if sn is not None]
                         # child_cost = np.sum([n.cost for n in n.get_leaf_nodes()])
                         # print("len(subnodes) = {}".format(len(subnodes)))
-                        child_cost = np.sum([cost_func(sn.data) for sn in subnodes])
+                        if additive_cost:
+                            # cost is the sum of the child costs
+                            child_cost = np.sum([cost_func(sn.data) for sn in subnodes])
+                        else:
+                            # need concatenated child data to compute the cost
+                            child_cost = cost_func(
+                                np.concatenate([sn.data for sn in subnodes]))
                         # print("path={}, costs = {}, {}".format(self.path, cost, child_cost))
                         if child_cost < cost:
                             self.cost = child_cost
@@ -411,7 +418,9 @@ class BaseNode(object):
                     else:
                         self.cost = cost
                 if subnode is not None:
-                    subnode.walk(func, args, kwargs, decompose, cost_func=cost_func)
+                    subnode.walk(func, args, kwargs, decompose,
+                                 cost_func=cost_func,
+                                 additive_cost=additive_cost)
 
     def walk_depth(self, func, args=(), kwargs=None, decompose=True):
         """
@@ -769,7 +778,8 @@ class WaveletPacket(Node):
             return data
         return self.data  # return original data
 
-    def get_level(self, level, order="natural", decompose=True, cost_func=None):
+    def get_level(self, level, order="natural", decompose=True,
+                  cost_func=None, additive_cost=True):
         """
         Returns all nodes on the specified level.
 
@@ -804,7 +814,8 @@ class WaveletPacket(Node):
                 return False
             return True
 
-        self.walk(collect, decompose=decompose, cost_func=cost_func)
+        self.walk(collect, decompose=decompose, cost_func=cost_func,
+                  additive_cost=additive_cost)
         if cost_func is not None:
             result = self.get_leaf_nodes(decompose=False)
         if order == "natural":
@@ -881,7 +892,8 @@ class WaveletPacket2D(Node2D):
         return self.data  # return original data
 
 
-    def get_level(self, level, order="natural", decompose=True, cost_func=None):
+    def get_level(self, level, order="natural", decompose=True,
+                  cost_func=None, additive_cost=True):
         """
         Returns all nodes from specified level.
 
@@ -912,7 +924,8 @@ class WaveletPacket2D(Node2D):
                 return False
             return True
 
-        self.walk(collect, decompose=decompose, cost_func=cost_func)
+        self.walk(collect, decompose=decompose, cost_func=cost_func,
+                  additive_cost=True)
         if cost_func is not None:
             result = self.get_leaf_nodes(decompose=False)
         if order == "freq":
@@ -1015,7 +1028,8 @@ class WaveletPacketND(NodeND):
             return data
         return self.data  # return original data
 
-    def get_level(self, level, order="natural", decompose=True, cost_func=None):
+    def get_level(self, level, order="natural", decompose=True,
+                  cost_func=None, additive_cost=True):
         """
         Returns all nodes from specified level.
 
@@ -1046,7 +1060,8 @@ class WaveletPacketND(NodeND):
                 return False
             return True
 
-        self.walk(collect, decompose=decompose, cost_func=cost_func)
+        self.walk(collect, decompose=decompose, cost_func=cost_func,
+                  additive_cost=additive_cost)
         if cost_func is not None:
             result = self.get_leaf_nodes(decompose=False)
 
