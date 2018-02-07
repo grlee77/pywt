@@ -394,6 +394,7 @@ class BaseNode(object):
                             # need concatenated child data to compute the cost
                             child_cost = cost_func(
                                 np.concatenate([sn.data for sn in subnodes]))
+
                         # print("path={}, costs = {}, {}".format(self.path, cost, child_cost))
                         if child_cost < cost:
                             self.cost = child_cost
@@ -877,6 +878,7 @@ class WaveletPacket2D(Node2D):
 
     def get_level(self, level, order="natural", decompose=True,
                   cost_func=None, additive_cost=True):
+
         """
         Returns all nodes from specified level.
 
@@ -1045,6 +1047,7 @@ class WaveletPacketND(NodeND):
 
         self.walk(collect, decompose=decompose, cost_func=cost_func,
                   additive_cost=additive_cost)
+
         if cost_func is not None:
             result = self.get_leaf_nodes(decompose=False)
 

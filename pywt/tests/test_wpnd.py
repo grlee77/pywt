@@ -140,7 +140,7 @@ def test_wavelet_packet_dtypes():
         # full decomposition
         wp.get_level(wp.maxlevel)
 
-        # recontsruction from coefficients should preserve dtype
+        # reconstruction from coefficients should preserve dtype
         r = wp.reconstruct(False)
         assert_equal(r.dtype, x.dtype)
         assert_allclose(r, x, atol=1e-6, rtol=1e-6)
