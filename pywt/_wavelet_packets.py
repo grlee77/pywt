@@ -73,6 +73,7 @@ class BaseNode(object):
 
         # data - signal on level 0, coeffs on higher levels
         self.data = data
+        self.data_size = data.shape
         self.cost = None
 
         self._init_subnodes()
@@ -494,6 +495,8 @@ class Node(BaseNode):
         else:
             rec = idwt(data_a, data_d, self.wavelet, self.mode,
                        axis=self.axes)
+            if self.data_size is not None and (rec.shape != self.data_size):
+                rec = rec[[slice(sz) for sz in self.data_size]]
             if update:
                 self.data = rec
             return rec
@@ -562,6 +565,8 @@ class Node2D(BaseNode):
         else:
             coeffs = data_ll, (data_hl, data_lh, data_hh)
             rec = idwt2(coeffs, self.wavelet, self.mode, axes=self.axes)
+            if self.data_size is not None and (rec.shape != self.data_size):
+                rec = rec[[slice(sz) for sz in self.data_size]]
             if update:
                 self.data = rec
             return rec
@@ -694,6 +699,8 @@ class NodeND(BaseNode):
             )
         else:
             rec = idwtn(coeffs, self.wavelet, self.mode, axes=self.axes)
+            if self.data_size is not None and (rec.shape != self.data_size):
+                rec = rec[[slice(sz) for sz in self.data_size]]
             if update:
                 self.data = rec
             return rec
