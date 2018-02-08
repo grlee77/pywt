@@ -122,6 +122,7 @@ def test_reconstructing_data():
 
 def test_removing_nodes():
     x = [1, 2, 3, 4, 5, 6, 7, 8]
+    x = np.arange(512)
     wp = pywt.WaveletPacket(data=x, wavelet='db1', mode='symmetric')
     wp.get_level(2)
 
@@ -207,25 +208,26 @@ def test_trim_leaf_nodes_1d():
     """Test pruning of a decomposition down to a specified set of keys."""
     atol = rtol = 1e-12
     x = np.random.randn(64)
-    wp = pywt.WaveletPacket(x, 'db2', mode='periodization')
-    level = 3
-    wp.get_level(level)
-    leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+    for mode in ['periodization', 'symmetric']:
+        wp = pywt.WaveletPacket(x, 'db2', mode=mode)
+        level = 3
+        wp.get_level(level)
+        leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
 
-    # wavedec has fewer nodes than a full wavelet packet decomposition
-    wavedec_leaf_names = _wavedec_keys(level)
-    assert_(len(wavedec_leaf_names) < len(leaf_names))
+        # wavedec has fewer nodes than a full wavelet packet decomposition
+        wavedec_leaf_names = _wavedec_keys(level)
+        assert_(len(wavedec_leaf_names) < len(leaf_names))
 
-    # trim the decomposition to match the DWT
-    wp.trim_nodes(leaf_names=wavedec_leaf_names)
+        # trim the decomposition to match the DWT
+        wp.trim_nodes(leaf_names=wavedec_leaf_names)
 
-    # verify that the leaf nodes now match those used during trimming
-    trimmed_leaf_names = [n.path for n in wp.get_leaf_nodes(decompose=False)]
-    assert_equal(sorted(trimmed_leaf_names),
-                 sorted(wavedec_leaf_names))
-    # verify perfect reconstruction from this modified basis
-    r = wp.reconstruct()
-    assert_allclose(x, r, atol=atol, rtol=rtol)
+        # verify that the leaf nodes now match those used during trimming
+        trimmed_leaves = [n.path for n in wp.get_leaf_nodes(decompose=False)]
+        assert_equal(sorted(trimmed_leaves),
+                     sorted(wavedec_leaf_names))
+        # verify perfect reconstruction from this modified basis
+        r = wp.reconstruct()
+        assert_allclose(x, r, atol=atol, rtol=rtol)
 
 
 if __name__ == '__main__':
