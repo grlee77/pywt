@@ -122,6 +122,7 @@ def test_reconstructing_data():
 
 def test_removing_nodes():
     x = [1, 2, 3, 4, 5, 6, 7, 8]
+    x = np.arange(512)
     wp = pywt.WaveletPacket(data=x, wavelet='db1', mode='symmetric')
     wp.get_level(2)
 
