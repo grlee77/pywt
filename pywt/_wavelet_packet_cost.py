@@ -231,7 +231,7 @@ def cost_pq_mean(c, p=1, q=2):
 
 
 def cost_gini(c):
-    """Cost corresponding to the Gini Index.
+    """Non-additive cost corresponding to the Gini Index.
 
     Parameters
     ----------
@@ -265,6 +265,44 @@ def cost_gini(c):
     term2 = (n + 0.5 - np.arange(1, c.size + 1))
     term2 /= (n * l1)
     return -(1 - 2 * np.sum(ca * term2))
+
+
+def cost_cov(c):
+    """Non-additive cost based on coefficient of variation.
+
+    This cost function is simply (mean / standard deviation) of the coefficient
+    magnitudes.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        Signal coefficients.
+
+    Returns
+    -------
+    cost : float
+        The cost.
+
+    Notes
+    -----
+    This simple cost function was found to outperform the Gini index when used
+    in optimizing an adaptive curvelet transform for Seismic imaging [1]_,
+    [2]_.
+
+    Reference
+    ---------
+    .. [1] H. Al-Marzouqi and G. AlRegib. Using the Coefficient of Variation to
+        Improve the Sparsity of Seismic Data. Global Conference on Signal and
+        Information Processing (GlobalSIP), 2013 IEEE
+        DOI:10.1109/GlobalSIP.2013.6736967
+    .. [2] H. Al-Marzouqi and G. AlRegib. Using the Coefficient of Variation to
+        Improve the Sparsity of Seismic Data. Signal Processing: Image
+        Communication, Vol. 53, pp.24-39, 2017.
+        DOI:10.1016/j.image.2017.01.009
+    """
+    ca = np.abs(c)
+    return np.std(ca) / np.mean(ca)
+
 
 
 if False:
