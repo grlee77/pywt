@@ -72,8 +72,12 @@ class BaseNode(object):
             self.level = 0
 
         # data - signal on level 0, coeffs on higher levels
+        if data is None:
+            self.data_size = None
+        else:
+            self.data = data
+            self.data_size = np.asarray(data).shape
         self.data = data
-        self.data_size = data.shape
         self.cost = None
 
         self._init_subnodes()
