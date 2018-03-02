@@ -78,7 +78,6 @@ class BaseNode(object):
             self.data = data
             self.data_size = np.asarray(data).shape
         self.data = data
-        self.cost = None
 
         self._init_subnodes()
 
