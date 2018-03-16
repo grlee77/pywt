@@ -118,7 +118,7 @@ def idwt2(coeffs, wavelet, mode='symmetric', axes=(-2, -1)):
     return idwtn(coeffs, wavelet, mode, axes)
 
 
-def dwtn(data, wavelet, mode='symmetric', axes=None):
+def dwtn(data, wavelet, mode='symmetric', axes=None, optimize=True):
     """
     Single-level n-dimensional Discrete Wavelet Transform.
 
@@ -143,6 +143,10 @@ def dwtn(data, wavelet, mode='symmetric', axes=None):
         will be larger, with additional values derived according to the
         ``mode`` parameter. ``pywt.wavedecn`` should be used for multilevel
         decomposition.
+    optimize : bool, optional
+        If True, the order in which the axes are filtered is optimized to
+        reduce the amount of times subsets of `data` must be copied. If False,
+        decomposition always proceeds in the order specified in `axes`.
 
     Returns
     -------
@@ -181,15 +185,40 @@ def dwtn(data, wavelet, mode='symmetric', axes=None):
     modes = _modes_per_axis(mode, axes)
     wavelets = _wavelets_per_axis(wavelet, axes)
 
+    # Reorder (axes, modes, wavelets) for optimal computation time:
+    #    Process any contiguous axis first (when the data is largest). This
+    #    reduces the number of in-memory copies required later while filtering
+    #    along the non-contiguous axes.
+    axes_compute = axes
+    if optimize and len(axes) > 1:
+        if data.flags.c_contiguous:
+            axes_compute = sorted(axes, reverse=True)
+        elif data.flags.f_contiguous:
+            axes_compute = sorted(axes, reverse=False)
+        if axes != axes_compute:
+            # reorder modes and wavelets to match axes_compute
+            order = [axes.index(a) for a in axes_compute]
+            modes = [modes[a] for a in order]
+            wavelets = [wavelets[a] for a in order]
+
     coeffs = [('', data)]
-    for axis, wav, mode in zip(axes, wavelets, modes):
+    for axis, wav, mode in zip(axes_compute, wavelets, modes):
         new_coeffs = []
         for subband, x in coeffs:
             cA, cD = dwt_axis(x, wav, mode, axis)
             new_coeffs.extend([(subband + 'a', cA),
                                (subband + 'd', cD)])
         coeffs = new_coeffs
-    return dict(coeffs)
+
+    if optimize and axes != axes_compute:
+        # Make sure keys match axes rather than axes_compute
+        def _reorder_key(k, order):
+            return ''.join([k[n] for n in order])
+        coeffs = {_reorder_key(k, order): v for k, v in new_coeffs}
+    else:
+        coeffs = dict(coeffs)
+
+    return coeffs
 
 
 def _fix_coeffs(coeffs):

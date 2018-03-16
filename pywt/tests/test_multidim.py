@@ -73,7 +73,7 @@ def test_dwdtn_idwtn_allwavelets():
 def test_stride():
     wavelet = pywt.Wavelet('haar')
 
-    for dtype in ('float32', 'float64'):
+    for dtype, atol in (('float32', 1e-6), ('float64', 1e-14)):
         data = np.array([[0, 4, 1, 5, 1, 4],
                          [0, 5, 6, 3, 2, 1],
                          [2, 5, 19, 4, 19, 1]],
@@ -85,12 +85,12 @@ def test_stride():
             strided[::-1, ::2] = data
             strided_dwtn = pywt.dwtn(strided[::-1, ::2], wavelet)
             for key in expected.keys():
-                assert_allclose(strided_dwtn[key], expected[key])
+                assert_allclose(strided_dwtn[key], expected[key], atol=atol)
 
 
 def test_byte_offset():
     wavelet = pywt.Wavelet('haar')
-    for dtype in ('float32', 'float64'):
+    for dtype, atol in (('float32', 1e-6), ('float64', 1e-14)):
         data = np.array([[0, 4, 1, 5, 1, 4],
                          [0, 5, 6, 3, 2, 1],
                          [2, 5, 19, 4, 19, 1]],
@@ -104,7 +104,7 @@ def test_byte_offset():
             padded[:] = data
             padded_dwtn = pywt.dwtn(padded['data'], wavelet)
             for key in expected.keys():
-                assert_allclose(padded_dwtn[key], expected[key])
+                assert_allclose(padded_dwtn[key], expected[key], atol=atol)
 
 
 def test_3D_reconstruct_complex():

@@ -152,6 +152,11 @@ def dwt(data, wavelet, mode='symmetric', axis=-1):
 
         ``len(cA) == len(cD) == ceil(len(data) / 2)``
 
+    The discrete wavelet transform tends to be memory bound rather than
+    compute bound. The transformation will be fastest when applied along a
+    contiguous dimension of the array (e.g. the last dimension for C-ordered
+    data or the first dimension for Fortran-ordered data).
+
     Examples
     --------
     >>> import pywt
