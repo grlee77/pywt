@@ -184,15 +184,14 @@ def cwt(data, scales, wavelet, sampling_period=1., method='conv', axis=-1):
                 # it has to be recomputed
                 fft_data = np.fft.fft(data, size_scale, axis=axis)
             size_scale0 = size_scale
-            fft_wav = np.fft.fft(int_psi_scale, size_scale, axis=axis)
+            fft_wav = np.fft.fft(int_psi_scale, size_scale)
             if data.ndim > 1:
                 fft_wav = _reshape_nd(fft_wav, data.ndim, axis=axis)
             conv = np.fft.ifft(fft_wav * fft_data, axis=axis)
-            sl = slice(data.size + int_psi_scale.size - 1)
+            if not np.iscomplexobj(out):
+                conv = conv.real
+            sl = slice(data.shape[axis] + int_psi_scale.size - 1)
             conv = conv[_slice_at_axis(sl, axis)]
-
-        if not np.iscomplexobj(out):
-            conv = conv.real
         coef = - np.sqrt(scale) * np.diff(conv, axis=axis)
         d = (coef.shape[axis] - data.shape[axis]) / 2.
         if d > 0:
