@@ -67,7 +67,8 @@ def mra(data, wavelet, level=None, axis=-1, transform='swt',
     if is_swt:
         # replicate same zeros array to save memory
         z = np.zeros_like(wav_coeffs[0])
-        tmp = [z, ] * nc
+        tmp = [None] * nc  # TODO: fix iswt to allow None here?
+        tmp[0] = z  # iswt requires the approximation coeffs not be None
     else:
         # zero arrays have variable size in DWT case
         tmp = [np.zeros_like(c) for c in wav_coeffs]
@@ -84,10 +85,13 @@ def mra(data, wavelet, level=None, axis=-1, transform='swt',
         mra_coeffs.append(rec)
 
         # restore zeros
-        if is_swt:
-            tmp[j] = z
+        if j > 0:
+            tmp[j] = None
         else:
-            tmp[j] = np.zeros_like(tmp[j])
+            if is_swt:
+                tmp[j] = z
+            else:
+                tmp[j] = np.zeros_like(tmp[j])
     return mra_coeffs
 
 
