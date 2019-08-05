@@ -8,7 +8,7 @@ from ._multilevel import (wavedec, waverec, wavedec2, waverec2, wavedecn,
 from ._utils import _wavelets_per_axis, _modes_per_axis
 
 
-__all__ = ["mra", "mra2", "mran"]
+__all__ = ["mra", "mra2", "mran", "imra", "imra2", "imran"]
 
 
 def mra(data, wavelet, level=None, axis=-1, transform='swt',
@@ -67,8 +67,7 @@ def mra(data, wavelet, level=None, axis=-1, transform='swt',
     if is_swt:
         # replicate same zeros array to save memory
         z = np.zeros_like(wav_coeffs[0])
-        tmp = [None] * nc  # TODO: fix iswt to allow None here?
-        tmp[0] = z  # iswt requires the approximation coeffs not be None
+        tmp = [z] * nc
     else:
         # zero arrays have variable size in DWT case
         tmp = [np.zeros_like(c) for c in wav_coeffs]
@@ -85,13 +84,10 @@ def mra(data, wavelet, level=None, axis=-1, transform='swt',
         mra_coeffs.append(rec)
 
         # restore zeros
-        if j > 0:
-            tmp[j] = None
+        if is_swt:
+            tmp[j] = z
         else:
-            if is_swt:
-                tmp[j] = z
-            else:
-                tmp[j] = np.zeros_like(tmp[j])
+            tmp[j] = np.zeros_like(tmp[j])
     return mra_coeffs
 
 
