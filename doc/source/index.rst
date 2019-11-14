@@ -68,6 +68,10 @@ the link in the badge below to Zenodo:
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1407171.svg
    :target: https://doi.org/10.5281/zenodo.1407171
 
+For Enterprise
+--------------
+:download:`Information on Enterprise Support <./_static/Tidelift_enterprise.html>`.
+
 Contents
 --------
 
