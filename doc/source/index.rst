@@ -80,5 +80,6 @@ Contents
    contributing
    dev/index
    releasenotes
+   For Enterprise<enterprise>
 
 .. include:: common_refs.rst
