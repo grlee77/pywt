@@ -3,6 +3,8 @@ from . cimport common
 from . cimport c_wt
 from cpython cimport bool
 
+from ._pywt cimport Wavelet, cdata_t
+
 import warnings
 import numpy as np
 cimport numpy as np
@@ -10,8 +12,10 @@ cimport numpy as np
 from .common cimport pywt_index_t
 from ._pywt cimport c_wavelet_from_object, cdata_t, Wavelet, _check_dtype
 
-
 include "config.pxi"
+
+np.import_array()
+
 
 def swt_max_level(size_t input_len):
     """
