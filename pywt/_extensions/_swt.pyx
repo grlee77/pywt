@@ -54,7 +54,7 @@ def swt_max_level(size_t input_len):
 
 
 def swt(cdata_t[::1] data, Wavelet wavelet, size_t level, size_t start_level,
-        bool trim_approx=False):
+        bool trim_approx):
     cdef cdata_t[::1] cA, cD
     cdef Wavelet w
     cdef int retval
